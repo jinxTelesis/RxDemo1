@@ -10,6 +10,7 @@ import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -27,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     private DisposableObserver<String> myObserver;
     private DisposableObserver<String> myObserver2;
 
+    private CompositeDisposable compositeDisposable=new CompositeDisposable();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +43,10 @@ public class MainActivity extends AppCompatActivity {
         // where user interactions happen
         //myObservable.observeOn(AndroidSchedulers.mainThread()); //
 
-        myObservable.subscribeOn(Schedulers.io());
-        myObservable.observeOn(AndroidSchedulers.mainThread());
+        //myObservable.subscribeOn(Schedulers.io());
+        //myObservable.observeOn(AndroidSchedulers.mainThread());
+
+
 
 
         myObservable=Observable.just(greeting);
@@ -65,6 +70,16 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        //myObservable.subscribe(myObserver);
+        //compositeDisposable.add(myObserver);
+
+        compositeDisposable.add(
+
+        myObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(myObserver));
+
 
         myObserver2=new DisposableObserver<String>() {
             @Override
@@ -85,15 +100,19 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        myObservable.subscribe(myObserver2);
+        //myObservable.subscribe(myObserver2);
+        //compositeDisposable.add(myObserver2);
+
+        compositeDisposable.add(
+                myObservable.subscribeWith(myObserver2)
+        );
 
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        myObserver.dispose();
-        myObserver2.dispose();
+        compositeDisposable.clear();
 
         //disposable.dispose();
     }
