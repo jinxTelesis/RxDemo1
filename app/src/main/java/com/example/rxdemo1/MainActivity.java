@@ -7,7 +7,11 @@ import android.widget.TextView;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,7 +23,10 @@ public class MainActivity extends AppCompatActivity {
     private String greeting="Hello From RxJava";
     private Observable<String> myObservable;
 
-    private Observer<String> myObserver;
+    private DisposableObserver<String> myObserver;
+
+    //private Disposable disposable;
+
 
 
     @Override
@@ -30,30 +37,58 @@ public class MainActivity extends AppCompatActivity {
         textView1=findViewById(R.id.blahblah);
 
 
+        // use for network interactions
+        //myObservable.subscribeOn(Schedulers.io());
+
+
+        // where user interactions happen
+        //myObservable.observeOn(AndroidSchedulers.mainThread()); //
+
+
 
         myObservable=Observable.just(greeting);
 
-        myObserver= new Observer<String>(){
+//        myObserver= new Observer<String>(){
+//
+//            @Override
+//            public void onSubscribe(Disposable d) {
+//                Log.i(TAG, "on Next invoked");
+//                disposable =d;
+//
+//
+//
+//            }
+//
+//            @Override
+//            public void onNext(String s) {
+//                Log.i(TAG, "on Next invoked");
+//                textView1.setText(s);
+//
+//            }
+//
+//            @Override
+//            public void onError(Throwable e) {
+//                Log.i(TAG, "on Next invoked");
+//
+//            }
+//
+//            @Override
+//            public void onComplete() {
+//                Log.i(TAG, "on Next invoked");
+//
+//            }
+//        };
 
-            @Override
-            public void onSubscribe(Disposable d) {
-                Log.i(TAG, "on Next invoked");
-
-
-
-            }
-
+        myObserver=new DisposableObserver<String>() {
             @Override
             public void onNext(String s) {
                 Log.i(TAG, "on Next invoked");
-                textView1.setText(s);
-
+//                textView1.setText(s););
             }
 
             @Override
             public void onError(Throwable e) {
                 Log.i(TAG, "on Next invoked");
-
             }
 
             @Override
@@ -64,5 +99,14 @@ public class MainActivity extends AppCompatActivity {
         };
 
         myObservable.subscribe(myObserver);
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        myObserver.dispose();
+
+        //disposable.dispose();
     }
 }
